@@ -1,7 +1,7 @@
 name: Golint CI
 
 on:
-  push:
+  pull_request:
     branches: [master]
 
 jobs:
@@ -13,17 +13,18 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-      - name: Get changed YAML files
+      - name: Get changed files
         id: changed-files
         run: |
-          echo "files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '\.ya?ml$' || true)" >> $GITHUB_OUTPUT
+          files=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }})
+          echo "files=$(echo $files | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
-      - name: Show changed files
-        id: show-files
+      - name: Show files var
         run: |
-          echo "${{ steps.changed-files.outputs.files }}" | tee /dev/stderr
-
+          echo "Changed files are: ${{ steps.changed-files.outputs.files }}"
 
       # - name: Check yaml lint
       #   run: |
