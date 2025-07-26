@@ -1,0 +1,35 @@
+name: Golint CI
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  container-test-job:
+    runs-on: ubuntu-latest
+    container:
+      image: leeegiit/golint:latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Get changed YAML files
+        id: changed-files
+        run: |
+          echo "files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '\.ya?ml$' || true)" >> $GITHUB_OUTPUT
+
+      - name: Show changed files
+        id: show-files
+        run: |
+          echo "${{ steps.changed-files.outputs.files }}" | tee /dev/stderr
+
+
+      # - name: Check yaml lint
+      #   run: |
+      #     if [ -n "${{ steps.changed-files.outputs.files }}" ]; then
+      #       echo "YAML files changed: ${{ steps.changed-files.outputs.files }}"
+      #       yaml-checker ${{ steps.changed-files.outputs.files }}
+      #     else
+      #       echo "No YAML files changed."
+      #     fi
