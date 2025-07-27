@@ -24,6 +24,7 @@ jobs:
 
   golint:
     runs-on: ubuntu-latest
+    needs: get-diff
     container:
       image: leeegiit/golint:latest
 
