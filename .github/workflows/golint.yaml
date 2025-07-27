@@ -5,10 +5,10 @@ on:
     branches: [main]
 
 jobs:
-  container-test-job:
+  get-diff:
     runs-on: ubuntu-latest
-    container:
-      image: leeegiit/golint:latest
+    outputs:
+      changed_files: ${{ steps.get-files.outputs.files }}
 
     steps:
       - name: Checkout repo
@@ -17,20 +17,28 @@ jobs:
           fetch-depth: 0
 
       - name: Get changed files
-        id: changed-files
+        id: get-files
         run: |
           files=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }})
           echo "files=$(echo $files | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
-      - name: Show files var
-        run: |
-          echo "Changed files are: ${{ steps.changed-files.outputs.files }}"
+  golint:
+    runs-on: ubuntu-latest
+    container:
+      image: leeegiit/golint:latest
 
-      # - name: Check yaml lint
-      #   run: |
-      #     if [ -n "${{ steps.changed-files.outputs.files }}" ]; then
-      #       echo "YAML files changed: ${{ steps.changed-files.outputs.files }}"
-      #       yaml-checker ${{ steps.changed-files.outputs.files }}
-      #     else
-      #       echo "No YAML files changed."
-      #     fi
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Show changed files
+        run: |
+          echo "Files: ${{ needs.get-diff.outputs.changed_files }}"
+
+      - name: Run yaml-checker
+        run: |
+          if [ -n "${{ needs.get-diff.outputs.changed_files }}" ]; then
+            yaml-checker ${{ needs.get-diff.outputs.changed_files }}
+          else
+            echo "No files to check"
+          fi
