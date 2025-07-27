@@ -19,6 +19,6 @@ spec:
     spec:
       containers:
       - image: nginx:latest
-        name: nginx
+        name=nginx
         resources: {}
 status: {}
