@@ -27,6 +27,11 @@ jobs:
     needs: get-diff
     container:
       image: leeegiit/golint:latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        GITHUB_OWNER: ${{ github.repository_owner }}
+        GITHUB_REPO: ${{ github.event.repository.name }}
 
     steps:
       - name: Checkout repo
@@ -43,3 +48,7 @@ jobs:
           else
             echo "No files to check"
           fi
+      
+      - name: Run commentOnPr
+        run: |
+            comment-on-pr
